@@ -1,0 +1,67 @@
+name: Windows
+
+on:
+  push:
+    branches: [windows-gnu]
+
+jobs:
+
+  build:
+    runs-on: windows-2022
+    
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v3
+
+    - name: Install x86 GCC in MSYS2
+      run: C:\msys64\usr\bin\pacman.exe --sync --needed --noconfirm mingw-w64-i686-gcc mingw-w64-i686-make mingw-w64-i686-pkgconf mingw-w64-i686-jq tree
+
+    - name: Add MSYS2 mingw32 to PATH
+      run: |
+        echo "C:\msys64\mingw32\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "C:\msys64\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: gtk
+      run: |
+        curl.exe -L -o gtk+-bundle_2.16.6-20100912_win32.zip https://download.gnome.org/binaries/win32/gtk+/2.16/gtk+-bundle_2.16.6-20100912_win32.zip
+        Expand-Archive gtk+-bundle_2.16.6-20100912_win32.zip -DestinationPath gtk
+
+    - name: Pidgin
+      run: |
+        curl.exe -L -o pidgin-2.14.14-win32-bin.zip http://prdownloads.sourceforge.net/pidgin/pidgin-2.14.14-win32-bin.zip
+        Expand-Archive pidgin-2.14.14-win32-bin.zip -DestinationPath .
+        curl.exe -L -o pidgin-2.14.14.tar.bz2 http://prdownloads.sourceforge.net/pidgin/pidgin-2.14.14.tar.bz2
+        
+    - name: Extract Sources
+      uses: ihiroky/extract-action@v1
+      with:
+        file_path: pidgin-2.14.14.tar.bz2
+        verbose: true
+    
+    - name: Install Rust Toolchain
+      run: rustup toolchain install stable-i686-pc-windows-gnu --profile minimal
+    
+    - name: Enable Rust Cache # maybe this helps with build times
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: "src/rust"
+
+    - name: vcpkg
+      uses: johnwason/vcpkg-action@v6
+      with:
+        pkgs: libqrencode openssl
+        triplet: x86-mingw-static
+        token: ${{ github.token }}
+
+    - name: make
+      run: |
+        $PWDforward = $PWD.Path.Replace("\","/")
+        (Get-Content purple.pc).Replace("PWD", $PWDforward) | Set-Content purple.pc
+        $env:PKG_CONFIG_PATH="${{ github.workspace }}/vcpkg/installed/x86-mingw-static/lib/pkgconfig;"+$PWDforward+"/gtk/lib/pkgconfig;"+$PWDforward
+        $env:PKG_CONFIG_PURPLE_ARGS="--define-variable=prefix="+$PWDforward+"/gtk"
+        $env:OPENSSL_DIR="${{ github.workspace }}/vcpkg/installed/x86-mingw-static"
+        $env:RUST_LIBS="-lcrypto -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
+        make
+        ls
