@@ -1,9 +1,9 @@
-includedir=PWD/pidgin-2.14.14
-libdir=PWD/pidgin-2.14.14-win32bin
-plugindir=PWD/pidgin-2.14.14-win32bin/plugins
+includedir=D:/a/purple-presage/purple-presage/pidgin-2.14.14
+libdir=D:/a/purple-presage/purple-presage/pidgin-2.14.14-win32bin
+plugindir=D:/a/purple-presage/purple-presage/pidgin-2.14.14-win32bin/plugins
 
 Name: libpurple
-Description: This is a decoy file for pkg-config when used in github actions.
+Description: This is a decoy file for pkg-config when used in github actions on a windows runner.
 Version: 2.14.14
 Requires: glib-2.0
 Cflags: -I${includedir}/libpurple

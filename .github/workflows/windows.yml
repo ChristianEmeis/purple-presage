@@ -78,8 +78,6 @@ jobs:
     - name: make
       run: |
         $PWDforward = $PWD.Path.Replace("\","/")
-        (Get-Content purple.pc).Replace("PWD", $PWDforward) | Set-Content purple.pc
-        Get-Content purple.pc | Write-Host
         $env:PKG_CONFIG_PATH="${{ github.workspace }}/vcpkg/installed/x86-mingw-static/lib/pkgconfig;"+$PWDforward+"/gtk/lib/pkgconfig;"+$PWDforward
         # glib comes with .pc files, but their prefix is wrong and is adjusted here
         # purple depends on glib, however the purple .pc file does not use the prefix variable

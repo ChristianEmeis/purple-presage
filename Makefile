@@ -7,7 +7,7 @@ ifeq ($(OS),Windows_NT)
 endif
 
 libpresage.$(SUFFIX): src/c/purple-presage.a src/rust/target/debug/libpurple_presage_backend.a Makefile
-	$(CC) -shared -o $@ -Wl,--whole-archive src/c/purple-presage.a -Wl,--no-whole-archive src/rust/target/debug/libpurple_presage_backend.a $(LDFLAGS)
+	$(CC) -shared -o $@ -static-libgcc -Wl,--whole-archive src/c/purple-presage.a -Wl,--no-whole-archive src/rust/target/debug/libpurple_presage_backend.a $(LDFLAGS)
 
 .PHONY: clean src/c/purple-presage.a src/rust/target/debug/libpurple_presage_backend.a
 
