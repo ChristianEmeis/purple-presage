@@ -79,12 +79,17 @@ jobs:
       run: |
         $PWDforward = $PWD.Path.Replace("\","/")
         (Get-Content purple.pc).Replace("PWD", $PWDforward) | Set-Content purple.pc
+        Get-Content purple.pc | Write-Host
         $env:PKG_CONFIG_PATH="${{ github.workspace }}/vcpkg/installed/x86-mingw-static/lib/pkgconfig;"+$PWDforward+"/gtk/lib/pkgconfig;"+$PWDforward
+        # glib comes with .pc files, but their prefix is wrong and is adjusted here
+        # purple depends on glib, however the purple .pc file does not use the prefix variable
         $env:PKG_CONFIG_PURPLE_ARGS="--define-variable=prefix="+$PWDforward+"/gtk"
         $env:OPENSSL_DIR="${{ github.workspace }}/vcpkg/installed/x86-mingw-static"
-        $env:RUST_LIBS="-lcrypto -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
+        # overriding RUST_LIBS since the output of `cargo rustc -- --print native-static-libs` has been unreliable
+        $env:RUST_LIBS="-lcrypto -lcrypt32 -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
         make
         ls
+
 
 
 
