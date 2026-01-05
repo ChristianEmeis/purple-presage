@@ -31,27 +31,30 @@ jobs:
         
     - name: Setup Dependencies Cache
       uses: actions/cache@v5
+      id: cache
       with:
-        path: ${{ github.workspace }}/cache
-        key: windows-${{ hashFiles('${{ github.workspace }}/*') }}
+        path: |
+          gtk+-bundle_2.16.6-20100912_win32.zip
+          pidgin-2.14.14-win32-bin.zip
+          pidgin-2.14.14.tar.bz2
+          vcpkg/installed
+        key: windows-2026-01-05_1
 
     - name: gtk
       run: |
-        New-Item -ItemType Directory -Path ${{ github.workspace }}/cache -Force
-        curl.exe -L --skip-existing -o ${{ github.workspace }}/cache/gtk+-bundle_2.16.6-20100912_win32.zip https://download.gnome.org/binaries/win32/gtk+/2.16/gtk+-bundle_2.16.6-20100912_win32.zip
-        Expand-Archive ${{ github.workspace }}/cache/gtk+-bundle_2.16.6-20100912_win32.zip -DestinationPath gtk
+        curl.exe -L --skip-existing -o gtk+-bundle_2.16.6-20100912_win32.zip https://download.gnome.org/binaries/win32/gtk+/2.16/gtk+-bundle_2.16.6-20100912_win32.zip
+        Expand-Archive gtk+-bundle_2.16.6-20100912_win32.zip -DestinationPath gtk
 
     - name: Pidgin
       run: |
-        New-Item -ItemType Directory -Path ${{ github.workspace }}/cache -Force
-        curl.exe -L --skip-existing -o ${{ github.workspace }}/cache/pidgin-2.14.14-win32-bin.zip http://prdownloads.sourceforge.net/pidgin/pidgin-2.14.14-win32-bin.zip
-        Expand-Archive ${{ github.workspace }}/cache/pidgin-2.14.14-win32-bin.zip -DestinationPath .
-        curl.exe -L --skip-existing -o ${{ github.workspace }}/cache/pidgin-2.14.14.tar.bz2 http://prdownloads.sourceforge.net/pidgin/pidgin-2.14.14.tar.bz2
+        curl.exe -L --skip-existing -o pidgin-2.14.14-win32-bin.zip http://prdownloads.sourceforge.net/pidgin/pidgin-2.14.14-win32-bin.zip
+        Expand-Archive pidgin-2.14.14-win32-bin.zip -DestinationPath .
+        curl.exe -L --skip-existing -o pidgin-2.14.14.tar.bz2 http://prdownloads.sourceforge.net/pidgin/pidgin-2.14.14.tar.bz2
         
     - name: Extract Sources
       uses: ihiroky/extract-action@v1
       with:
-        file_path: ${{ github.workspace }}/cache/pidgin-2.14.14.tar.bz2
+        file_path: pidgin-2.14.14.tar.bz2
         verbose: true
     
     - name: Install Rust Toolchain
@@ -65,6 +68,7 @@ jobs:
         workspaces: "src/rust"
 
     - name: vcpkg
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: johnwason/vcpkg-action@v6
       with:
         pkgs: libqrencode openssl
@@ -81,6 +85,7 @@ jobs:
         $env:RUST_LIBS="-lcrypto -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
         make
         ls
+
 
 
 
