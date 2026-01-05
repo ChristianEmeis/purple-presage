@@ -89,8 +89,11 @@ jobs:
         $env:RUST_LIBS="-lcrypto -lcrypt32 -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
         make
         ls
+        mv libpresage.dll libpresaged.dll
+        # Source - https://stackoverflow.com/a
+        Compress-Archive -Path libpresaged.dll -CompressionLevel Optimal -DestinationPath libpresaged.zip
 
-
-
-
-
+    - name: Upload Binary
+      uses: actions/upload-artifact@v4
+      with: 
+        path: libpresaged.zip
