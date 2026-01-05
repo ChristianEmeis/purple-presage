@@ -33,13 +33,13 @@ jobs:
       uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/cache
-        key: cache-${{ hashFiles('${{ github.workspace }}/*') }}
+        key: windows-${{ hashFiles('${{ github.workspace }}/*') }}
 
     - name: gtk
       run: |
         New-Item -ItemType Directory -Path ${{ github.workspace }}/cache -Force
         curl.exe -L --skip-existing -o ${{ github.workspace }}/cache/gtk+-bundle_2.16.6-20100912_win32.zip https://download.gnome.org/binaries/win32/gtk+/2.16/gtk+-bundle_2.16.6-20100912_win32.zip
-        Expand-Archive gtk+-bundle_2.16.6-20100912_win32.zip -DestinationPath gtk
+        Expand-Archive ${{ github.workspace }}/cache/gtk+-bundle_2.16.6-20100912_win32.zip -DestinationPath gtk
 
     - name: Pidgin
       run: |
@@ -81,5 +81,6 @@ jobs:
         $env:RUST_LIBS="-lcrypto -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
         make
         ls
+
 
 
