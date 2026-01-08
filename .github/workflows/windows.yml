@@ -83,6 +83,8 @@ jobs:
         # purple depends on glib, however the purple .pc file does not use the prefix variable
         $env:PKG_CONFIG_PURPLE_ARGS="--define-variable=prefix="+$PWDforward+"/gtk"
         $env:OPENSSL_DIR="${{ github.workspace }}/vcpkg/installed/x86-mingw-static"
+        # Link CRT and pthread statically
+        $env:RUSTFLAGS="-C target-feature=+crt-static"
         # overriding RUST_LIBS since the output of `cargo rustc -- --print native-static-libs` has been unreliable
         $env:RUST_LIBS="-lcrypto -lcrypt32 -lbcrypt -ladvapi32 -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp"
         make
